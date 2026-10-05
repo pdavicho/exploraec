@@ -8,9 +8,12 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(const ExploraEcApp());
 
-    // La lista de Inicio muestra los lugares de ejemplo.
+    // Mientras carga, se ve el LoadingView.
+    expect(find.text('Buscando lugares cercanos...'), findsOneWidget);
+
+    // Al terminar la carga simulada, la lista muestra los lugares de ejemplo.
+    await tester.pumpAndSettle();
     expect(find.text('Parque El Ejido'), findsOneWidget);
-    expect(find.text('Cargando lugares...'), findsNothing);
 
     // Tocar una tarjeta abre el Detalle.
     await tester.tap(find.text('Parque El Ejido'));
@@ -23,5 +26,17 @@ void main() {
     await tester.tap(find.text('Mapa'));
     await tester.pumpAndSettle();
     expect(find.text('Próximamente: mapa real (Sesión 5)'), findsOneWidget);
+  });
+
+  testWidgets('Usa el tema oscuro cuando el dispositivo está en modo oscuro',
+      (WidgetTester tester) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
+    await tester.pumpWidget(const ExploraEcApp());
+    await tester.pumpAndSettle();
+
+    final contexto = tester.element(find.text('Parque El Ejido'));
+    expect(Theme.of(contexto).brightness, Brightness.dark);
   });
 }
