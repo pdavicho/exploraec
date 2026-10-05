@@ -1,130 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'screens/home_screen.dart';
+import 'screens/map_placeholder_screen.dart';
+import 'screens/favorites_placeholder_screen.dart';
 
 void main() {
   runApp(const ExploraEcApp());
 }
 
-// Colores del sistema de diseño "Andes & Costa Discovery" (Stitch).
-const colorFondo = Color(0xFFEBFEF7);
-const colorPrimario = Color(0xFF006950);
-const colorSobrePrimario = Color(0xFFFFFFFF);
-const colorTextoSecundario = Color(0xFF3D4944);
-const colorContenedor = Color(0xFFDFF2EB);
-
 class ExploraEcApp extends StatelessWidget {
   const ExploraEcApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ExploraEC',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: colorPrimario,
-          primary: colorPrimario,
-          onPrimary: colorSobrePrimario,
-          surface: colorFondo,
-        ),
-        scaffoldBackgroundColor: colorFondo,
-        fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-      ),
-      home: const BienvenidaScreen(),
+      home: const RootShell(),
     );
   }
 }
 
-class BienvenidaScreen extends StatelessWidget {
-  const BienvenidaScreen({super.key});
+/// Contenedor raíz con la barra de navegación inferior — Sesión 2.
+class RootShell extends StatefulWidget {
+  const RootShell({super.key});
+
+  @override
+  State<RootShell> createState() => _RootShellState();
+}
+
+class _RootShellState extends State<RootShell> {
+  int _indiceActual = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 48, 20, 32),
-          child: Column(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 64,
-                        height: 64,
-                        decoration: const BoxDecoration(
-                          color: colorContenedor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.explore,
-                          color: colorPrimario,
-                          size: 36,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'ExploraEC',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 40,
-                        height: 48 / 40,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -1.2,
-                        color: colorPrimario,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 280),
-                      child: Text(
-                        'Descubre y guarda lugares cerca de ti',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
-                          height: 26 / 16,
-                          color: colorTextoSecundario,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorPrimario,
-                    foregroundColor: colorSobrePrimario,
-                    shape: const StadiumBorder(),
-                    elevation: 6,
-                    shadowColor: colorPrimario.withValues(alpha: 0.4),
-                    textStyle: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Empezar'),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, size: 20),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      // TODO(sesion-02): borra la línea de abajo y descomenta el bloque completo. (cuerpo según pestaña)
+      // Por qué: un body fijo en HomeScreen ignoraría qué pestaña está
+      // activa — este switch sobre _indiceActual es lo que hace que
+      // BottomNavigationBar (más abajo) realmente cambie de contenido
+      // al tocar cada pestaña, en vez de solo resaltarla.
+      body: switch (_indiceActual) {
+        0 => const HomeScreen(),
+        1 => const MapPlaceholderScreen(),
+        _ => const FavoritesPlaceholderScreen(),
+      },
+
+      // TODO(sesion-02): borra la línea de abajo y descomenta el bloque completo. (barra inferior)
+      // Por qué: sin este widget no hay pestañas que tocar — junto con
+      // el switch de arriba, BottomNavigationBar alterna entre
+      // Inicio/Mapa/Favoritos sin apilarlas como haría Navigator.push.
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _indiceActual,
+        onTap: (i) => setState(() => _indiceActual = i),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favoritos'),
+        ],
       ),
     );
   }
