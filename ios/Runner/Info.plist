@@ -8,6 +8,8 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Exploraec</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ExploraEC usa tu ubicación para mostrarte lugares cercanos en el mapa y la distancia a cada uno.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
