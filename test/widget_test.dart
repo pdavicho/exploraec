@@ -1,8 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 import 'package:exploraec/controllers/places_controller.dart';
 import 'package:exploraec/main.dart';
@@ -27,6 +30,15 @@ void main() {
   // GetX guarda el controller y el idioma de forma global: se limpian entre
   // tests para que cada uno arranque la app desde cero.
   tearDown(Get.reset);
+
+  // Sesión 7: la app lee favoritos e idioma de Hive. Como `main()` no corre
+  // en los tests, se abren aquí las mismas cajas, vacías y solo en memoria
+  // (`bytes:`): escribir a disco dentro de `testWidgets` nunca termina.
+  setUp(() async {
+    await Hive.openBox<Map>('favoritos', bytes: Uint8List(0));
+    await Hive.openBox('ajustes', bytes: Uint8List(0));
+  });
+  tearDown(Hive.close);
 
   /// Arranca la app y espera a que termine la carga simulada (1 s).
   Future<void> abrirApp(WidgetTester tester) async {
@@ -127,14 +139,17 @@ void main() {
     expect(find.text('Reintentar'), findsOneWidget);
   });
 
-  testWidgets('El corazón marca favoritos y la pestaña Favoritos los cuenta',
+  testWidgets('El corazón marca favoritos, se guarda en Hive y aparece en Favoritos',
       (WidgetTester tester) async {
     await abrirApp(tester);
     await tester.tap(find.byTooltip('Agregar a favoritos').first);
     await tester.pump();
+    // Sesión 7: además de la lista reactiva, queda guardado en la caja.
+    expect(Hive.box<Map>('favoritos').length, 1);
+
     await tester.tap(find.text('Favoritos'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Favoritos marcados: 1'), findsOneWidget);
+    expect(find.text('Parque El Ejido'), findsOneWidget);
   });
 
   // El botón de idioma llama a Get.updateLocale, que fuerza un "reassemble"

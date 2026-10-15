@@ -62,9 +62,31 @@ class GastosScreen extends GetView<GastosController> {
         // `cargarGastos` ya es `async`, así que se pasa tal cual: no hace falta
         // escribir nada nuevo. Mientras recarga, el `Obx` de arriba muestra el
         // `LoadingView` de siempre; eso es lo esperado.
-        return RefreshIndicator(
-          onRefresh: controller.cargarGastos,
-          child: _buildLista(controller.gastos),
+        // Paso 2 (Sesión 7): si el servidor no respondió, se avisa que la
+        // lista viene de la caché de Hive y desde cuándo.
+        return Column(
+          children: [
+            if (controller.desdeCache.value)
+              MaterialBanner(
+                leading: const Icon(Icons.cloud_off),
+                content: Text(
+                  'Sin conexión — mostrando tus gastos guardados '
+                  '(última sincronización: ${controller.ultimaSincronizacion})',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: controller.cargarGastos,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.cargarGastos,
+                child: _buildLista(controller.gastos),
+              ),
+            ),
+          ],
         );
       }),
     );
