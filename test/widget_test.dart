@@ -55,7 +55,8 @@ void main() {
     await tester.tap(find.text('Parque El Ejido'));
     await tester.pumpAndSettle();
     expect(find.byType(Chip), findsOneWidget); // sin distancia: no viene del Mapa
-    await tester.pageBack();
+    // Sesión 10: con flutter_localizations el tooltip es «Atrás», no «Back».
+    await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
   });
 

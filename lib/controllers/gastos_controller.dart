@@ -31,6 +31,23 @@ class GastosController extends GetxController {
   final RxBool desdeCache = false.obs;
   String get ultimaSincronizacion => _repository.ultimaSincronizacion;
 
+  /// Filtro por categoría — Sesión 10. `null` significa «Todas».
+  final Rxn<String> categoriaFiltro = Rxn<String>();
+
+  /// Categorías que aparecen en los gastos cargados (no las del backend):
+  /// así no se ofrece un chip que dejaría la lista vacía.
+  List<String> get categoriasEnGastos => gastos.map((g) => g.categoria).toSet().toList()..sort();
+
+  /// Lo que muestra la pantalla: todos los gastos o solo los de la categoría
+  /// elegida. Es estado derivado: no se guarda aparte.
+  List<Gasto> get gastosFiltrados {
+    final categoria = categoriaFiltro.value;
+    if (categoria == null) return gastos;
+    return gastos.where((g) => g.categoria == categoria).toList();
+  }
+
+  void filtrarPorCategoria(String? categoria) => categoriaFiltro.value = categoria;
+
   @override
   void onInit() {
     super.onInit();
@@ -74,6 +91,9 @@ class GastosController extends GetxController {
     gastos.value = lista;
     totalEnServidor.value = lista.length;
     desdeCache.value = cache;
+    // Si se borró o editó el último gasto de la categoría filtrada, se vuelve
+    // a «Todas» para no dejar la lista vacía sin explicación.
+    if (!categoriasEnGastos.contains(categoriaFiltro.value)) categoriaFiltro.value = null;
   }
 
   Future<void> cargarCategorias() async {
@@ -126,6 +146,7 @@ class GastosController extends GetxController {
     await _repository.vaciar();
     gastos.clear();
     categorias.clear();
+    categoriaFiltro.value = null;
     totalEnServidor.value = 0;
     desdeCache.value = false;
     mensajeError.value = '';
